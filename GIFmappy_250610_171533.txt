@@ -1,0 +1,39 @@
+import random
+
+GIFS = {
+    "0": "https://drive.google.com/file/d/1A1wKRG18nPMF5OTxbJ2RQIZpiJrzPs6t/view?usp=drivesdk",
+    "1": "https://drive.google.com/file/d/19c8O41hUHW_ISU3ix5aFqEJ0eYhzm-nN/view?usp=drivesdk",
+    "2": "https://drive.google.com/file/d/19Zk9PPXW5wEi2r4xC6VUrrVxFFGE0-5I/view?usp=drivesdk",
+    "3": "https://drive.google.com/file/d/199Cdsmf7ngQcT-oclP3tDGlxLbP9yer6/view?usp=drivesdk",
+    "4": [
+        "https://drive.google.com/file/d/19S_Gvw-ebPdHZqEdug1zTc6RMbkqq2E7/view?usp=drivesdk",
+        "https://drive.google.com/file/d/19Xke9msdVCHGV9gqmARUZMv4LndMK-__/view?usp=drivesdk",
+        "https://drive.google.com/file/d/19TCnbiqB4IhVCN7QCC9rR4I-BW8G2AhO/view?usp=drivesdk"
+    ],
+    "5": "https://drive.google.com/file/d/18YXaSlt_e2eQkduV0LRHt41y_7TufVDj/view?usp=drivesdk",
+    "6": [
+        "https://drive.google.com/file/d/19ejhzlookbLazs_JvwFlk16BQ7zMd2BT/view?usp=drivesdk",
+        "https://drive.google.com/file/d/19XSbKURtW_iW45WQQiDr37_RGTimuLFT/view?usp=drivesdk"
+    ],
+    "OUT": [
+        "https://drive.google.com/file/d/19Wlc9_6vEWG2Vr3PJ3RyYvAvkC17B9PM/view?usp=drivesdk",
+        "https://drive.google.com/file/d/19o2eXJLo8NVHgjDIYAGLcBf1ubZ83Scz/view?usp=drivesdk"
+    ]
+}
+
+MESSAGES = {
+    "0": "well defended 0 runs",
+    "1": "quick single 1 run",
+    "2": "good running 2 runs",
+    "3": "awesome running 3 runs",
+    "4": "beautiful cover drive 4 runs",
+    "5": "misfield 5 runs",
+    "6": "down the ground 6 runs",
+    "OUT": "OUT! Stumps broken"
+}
+
+def get_gif(result: str):
+    gif = GIFS.get(result)
+    if isinstance(gif, list):
+        return random.choice(gif)
+    return gif
