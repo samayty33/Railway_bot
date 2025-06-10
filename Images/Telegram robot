@@ -1,0 +1,109 @@
+import os
+from dotenv import load_dotenv
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (
+    Application, CommandHandler, MessageHandler, CallbackQueryHandler,
+    filters, ContextTypes
+)
+from database import (
+    db_init, save_display_name, get_display_name, add_team_member,
+    get_team_members, get_user_by_display_name
+)
+from gifmap import get_gif, MESSAGES
+
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# In-memory state for demo (extend with DB as needed)
+group_hosts = {}
+team_registration = {}
+
+async def private_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    display_name = await if not display_name:
+        await update.message.reply_text(
+            "Please choose your display name (max 7 characters). Example: If your name is Virat Kohli, type: Kohli"
+        )
+        return
+    await update.message.reply_text(
+        f"Display name saved. Now add me to a group to start a match.",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("Add to Group", url="https://t.me/CrickStrikeBot?startgroup=true")]]
+        )
+    )
+
+async def set_display_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    name = update.message.text.strip()
+    if len(name) > 7 or len(name) < 1:
+        await update.message.reply must be 1-7 characters.")
+        return
+    await save_display_name(user_id, name)
+    await update.message.reply_text("Display name saved. Now send /start again.")
+
+async def group_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Match is in starting stage! Find a host or tap below to become one.",
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("I am the host", callback_data="become_host")]]
+        )
+    )
+
+async def become_host(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat_id
+    user_id = query.from_user.id
+    display_name = await get_display_name(user_id)
+    if not display_name:
+        await query.edit_message_text("Please set your display name in private chat first.")
+        return
+    group_hosts[chat_id] = user_id
+    await query.edit_message_text(
+        f"Hey {display_name}, you are the official host! Send /maketeamone to start creating your team."
+    )
+
+async def maketeamone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    if group_hosts.get(chat_id) != user_id:
+        await update.message.reply_text("Only the host can start team registration.")
+        return
+    team_registration[chat_id] = 1
+    await update.message.reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+    if team_registration.get(chat_id) != 1:
+        await update.message.reply_text("Team 1 registration is not open.")
+        return
+    members = await get_team_members(chat_id, 1)
+    if len(members) >= 3:
+        await update.message.reply_text("Team 1 is full.")
+        return
+    is_captain = 1 if not members else 0
+    await add_team_member(chat_id, 1, user_id, is_captain)
+    display_name = await get_display_name(user_id)
+    await update.message.reply_text(f"{display_name} joined Team 1!")
+
+# Add similar handlers for team 2, toss, etc.
+
+def main():
+    import asyncio
+    asyncio.run(_amain())
+
+async def _amain():
+    await db_init()
+    app = Application.builder().token(BOT_TOKEN).build()
+
+    app.add_handler(CommandHandler("start", private_start))
+    app.add_handler(CommandHandler("maketeamone", maketeamone))
+    app.add_handler(CommandHandler("join_team_one", join_team_one))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), set_display_name))
+    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, group_start))
+    app.add_handler(CallbackQueryHandler(become_host, pattern="become_host"))
+
+    print("Bot running...")
+    await app.run_polling()
+
+if __name__ == "__main__":
+    main()
