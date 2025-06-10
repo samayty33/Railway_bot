@@ -12,7 +12,7 @@ from database import (
 from gifmap import get_gif, MESSAGES
 
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("7714464198:AAEiQmE2S03kVpuPMkIobHE0164NRcRN2vA")
 
 # In-memory state for demo (extend with DB as needed)
 group_hosts = {}
